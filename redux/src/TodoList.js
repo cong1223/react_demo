@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
-import 'antd/dist/antd.css'
-import {Input,Button,List} from "antd";
 import store from "./store";
+import {changeInputAction,addItemAction,deleteItemAction,getListAction,getTodoList} from './store/actionCreators'
+import TodoListUI from './TodoListUI'
+import axios from 'axios'
 const data=[
     '早8点开晨会，分配今天的开发工作',
     '早9点和项目经理作开发需求讨论会',
@@ -14,13 +15,12 @@ class TodoList extends Component {
         this.state = store.getState();
         this.storeChange = this.storeChange.bind(this);
         this.addItem = this.addItem.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+        this.onChangeInputValue = this.onChangeInputValue.bind(this);
         store.subscribe(this.storeChange)
     }
     onChangeInputValue(e) {
-        const action = {
-            type: 'change_input_value',
-            value: e.target.value
-        }
+        const action = changeInputAction(e.target.value);
         store.dispatch(action);
     }
     storeChange() {
@@ -28,31 +28,37 @@ class TodoList extends Component {
     }
 
     addItem() {
-        const action = {type: 'addItem'}
+        const action = addItemAction();
         store.dispatch(action);
     }
 
     deleteItem(index) {
-        const action = {
-            type: 'deleteItem',
-            index
-        }
+        const action = deleteItemAction(index);
         store.dispatch(action)
     }
 
     render() {
         return (
-            <div>
-                <Input placeholder={this.state.inputValue}
-                       style={{width: '250px'}}
-                       onChange={this.onChangeInputValue}></Input>
-                <Button type='primary' onClick={this.addItem}>增加一条</Button>
-                <div style={{margin: '10px',width: '300px'}}>
-                    <List bordered
-                          dataSource={this.state.list} renderItem={(item,index)=>(<List.Item onClick={this.deleteItem.bind(this,index)}>{item}</List.Item>)} />
-                </div>
-            </div>
+            <TodoListUI inputValue={this.state.inputValue}
+                        list={this.state.list}
+                        deleteItem={this.deleteItem}
+                        addItem={this.addItem}
+                        onChangeInputValue={this.onChangeInputValue} />
         );
+    }
+
+    componentDidMount() {
+        // 不使用thuck中间件   redux的中间件,不是react的中间件
+        // axios.get('https://douban.uieee.com/v2/movie/in_theaters').then(res => {
+        //     console.log(res);
+        //     let data = res.data.subjects;
+        //     const action = getListAction(data);
+        //     store.dispatch(action)
+        // })
+
+        // 使用thunk中间件
+        const action = getTodoList();
+        store.dispatch(action)
     }
 }
 
