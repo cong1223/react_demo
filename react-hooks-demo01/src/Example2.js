@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, {Component, useEffect, useState} from 'react';
 
 // 不用hooks的写法如下:
 // class Example2 extends Component {
@@ -34,10 +34,13 @@ import React, {Component, useState} from 'react';
 
 function Example2(props) {
     const [count, setCount] = useState(0);
+    useEffect(() => {
+        console.log(`useEffect=>You clicked ${count} times`)
+    })
     return (
         <div>
             <p>you click {count} times!</p>
-            <button onClick={() => {setCount(count+1)}}></button>
+            <button onClick={() => {setCount(count+1)}}>click me</button>
         </div>
     );
 }
